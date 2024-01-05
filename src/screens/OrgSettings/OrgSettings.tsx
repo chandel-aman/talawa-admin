@@ -9,6 +9,7 @@ import Row from 'react-bootstrap/Row';
 import { useTranslation } from 'react-i18next';
 import styles from './OrgSettings.module.css';
 import OrgProfileFieldSettings from 'components/OrgProfileFieldSettings/OrgProfileFieldSettings';
+import UpdateTimeout from 'components/UpdateTimeout/UpdateTimeout';
 
 function orgSettings(): JSX.Element {
   const { t } = useTranslation('translation', {
@@ -49,6 +50,7 @@ function orgSettings(): JSX.Element {
                 </div>
               </Card.Body>
             </Card>
+            <UpdateTimeout orgId={orgId} />
           </Col>
           <Col lg={7}>
             <Card border="0" className="rounded-4 mb-4">

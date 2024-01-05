@@ -23,6 +23,7 @@ import Loader from 'components/Loader/Loader';
 import { errorHandler } from 'utils/errorHandler';
 import styles from './LoginPage.module.css';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import { jwtDecode } from 'jwt-decode';
 
 function loginPage(): JSX.Element {
   const { t } = useTranslation('translation', { keyPrefix: 'loginPage' });
@@ -191,6 +192,18 @@ function loginPage(): JSX.Element {
             loginData.login.user.adminApproved === true)
         ) {
           localStorage.setItem('token', loginData.login.accessToken);
+          const decodedToken = jwtDecode(loginData.login.accessToken);
+          if (decodedToken && decodedToken.exp !== undefined) {
+            const expirationTime = decodedToken.exp * 1000;
+            const currentTime = Date.now();
+            const timeDifferenceInMilliseconds = expirationTime - currentTime;
+
+            localStorage.setItem(
+              'timeout',
+              String(timeDifferenceInMilliseconds)
+            );
+          }
+
           localStorage.setItem('refreshToken', loginData.login.refreshToken);
           localStorage.setItem('id', loginData.login.user._id);
           localStorage.setItem('IsLoggedIn', 'TRUE');

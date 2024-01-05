@@ -691,5 +691,23 @@
     "Supprimer le champ personnalisé": "Supprimer le champ personnalisé",
     "fieldSuccessMessage": "Champ ajouté avec succès",
     "fieldRemovalSuccess": "Champ supprimé avec succès"
+  },
+  "updateTimeout": {
+    "updateTimeout": "Mettre à jour la temporisation",
+    "currentTimeout": "Temporisation actuelle",
+    "noTimeoutSet": "Aucune temporisation définie (par défaut 30 minutes)",
+    "update": "Mettre à jour",
+    "15min": "15 min",
+    "30min": "30 min",
+    "45min": "45 min",
+    "60min": "60 min",
+    "minutes": "minutes",
+    "successfullyUpdated": "Durée de temporisation mise à jour"
+  },
+  "confirmLogoutModal": {
+    "confirmLogout": "Confirmer la déconnexion",
+    "logoutWarning": "Vous êtes déconnecté en raison d'une inactivité. Voulez-vous rester connecté?",
+    "yes": "Oui",
+    "no": "Non"
   }
 }

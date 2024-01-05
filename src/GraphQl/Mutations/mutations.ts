@@ -766,3 +766,12 @@ export const REMOVE_CUSTOM_FIELD = gql`
     }
   }
 `;
+
+export const UPDATE_ORGANIZATION_TIMEOUT = gql`
+  mutation ($organizationId: ID!, $timeout: Int!) {
+    updateOrganizationTimeout(
+      organizationId: $organizationId
+      timeout: $timeout
+    )
+  }
+`;

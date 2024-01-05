@@ -691,5 +691,23 @@
     "Eliminar campo personalizado": "Eliminar campo personalizado",
     "fieldSuccessMessage": "Campo agregado exitosamente",
     "fieldRemovalSuccess": "Campo eliminado exitosamente"
+  },
+  "updateTimeout": {
+    "updateTimeout": "Actualizar tiempo de espera",
+    "currentTimeout": "Tiempo de espera actual",
+    "noTimeoutSet": "Sin tiempo de espera establecido (predeterminado 30 minutos)",
+    "update": "Actualizar",
+    "15min": "15 min",
+    "30min": "30 min",
+    "45min": "45 min",
+    "60min": "60 min",
+    "minutes": "minutos",
+    "successfullyUpdated": "Duración de espera actualizada con éxito"
+  },
+  "confirmLogoutModal": {
+    "confirmLogout": "Confirmar cierre de sesión",
+    "logoutWarning": "Se cerrará la sesión debido a la inactividad. ¿Quieres permanecer conectado?",
+    "yes": "Sí",
+    "no": "No"
   }
 }

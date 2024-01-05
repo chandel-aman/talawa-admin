@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import * as installedPlugins from 'components/plugins/index';
@@ -34,8 +34,11 @@ import Events from 'screens/UserPortal/Events/Events';
 import Tasks from 'screens/UserPortal/Tasks/Tasks';
 // import Chat from 'screens/UserPortal/Chat/Chat';
 import Advertisements from 'components/Advertisements/Advertisements';
+import LogoutConfirmationModal from 'components/LogoutConfirmationModal/LogoutConfirmationModal';
 
 function app(): JSX.Element {
+  const [isConfirmationModalOpen, setConfirmationModalOpen] =
+    useState<boolean>(false);
   /*const { updatePluginLinks, updateInstalled } = bindActionCreators(
     actionCreators,
     dispatch
@@ -79,6 +82,65 @@ function app(): JSX.Element {
       localStorage.setItem('Email', data.checkAuth.email);
     }
   }, [data, loading]);
+
+  const isLoggedIn: boolean = localStorage.getItem('IsLoggedIn') === 'TRUE';
+
+  const timeoutMinutes = 15;
+  const timeoutMilliseconds = timeoutMinutes * 60 * 1000;
+
+  const inactiveIntervalMin = 1;
+  const inactiveIntervalMilsec = inactiveIntervalMin * 60 * 1000;
+
+  let lastActive = Date.now();
+  let logoutTimer: NodeJS.Timeout;
+
+  const handleLogout = (): void => {
+    window.location.href = '/';
+    localStorage.clear();
+  };
+
+  const handleConfirmSave = (): void => {
+    lastActive = Date.now();
+    startLogoutTimer();
+    setConfirmationModalOpen(false);
+  };
+
+  const handleCancelSave = (): void => {
+    handleLogout();
+    setConfirmationModalOpen(false);
+  };
+
+  const checkSessionTimeout = (): void => {
+    const currentTime: number = Date.now();
+    const timeSinceLastActive: number = currentTime - lastActive;
+
+    if (timeSinceLastActive > timeoutMilliseconds) {
+      clearInterval(logoutTimer);
+      setConfirmationModalOpen(true);
+    }
+  };
+
+  const startLogoutTimer = (): void => {
+    logoutTimer = setInterval(checkSessionTimeout, inactiveIntervalMilsec);
+  };
+
+  const handleUserActivity = (): void => {
+    lastActive = Date.now();
+  };
+
+  // Use useEffect to handle initial setup and cleanup
+  useEffect(() => {
+    if (isLoggedIn) {
+      startLogoutTimer();
+      document.addEventListener('mousemove', handleUserActivity);
+    }
+
+    // Cleanup on unmount or when component is not needed anymore
+    return () => {
+      clearInterval(logoutTimer);
+      document.removeEventListener('mousemove', handleUserActivity);
+    };
+  }, [isLoggedIn]);
 
   const extraRoutes = Object.entries(installedPlugins).map(
     (plugin: any, index) => {
@@ -133,6 +195,12 @@ function app(): JSX.Element {
 
         <Route exact path="*" component={PageNotFound} />
       </Switch>
+      <LogoutConfirmationModal
+        isOpen={isConfirmationModalOpen}
+        onRequestClose={() => setConfirmationModalOpen(false)}
+        handleConfirmSave={handleConfirmSave}
+        handleCancelSave={handleCancelSave}
+      />
     </>
   );
 }

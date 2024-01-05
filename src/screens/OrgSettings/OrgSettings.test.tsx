@@ -116,6 +116,7 @@ describe('Organisation Settings Page', () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/Other Settings/i)).toBeInTheDocument();
     expect(screen.getByText(/Change Language/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Update Timeout/i)[0]).toBeInTheDocument();
     expect(window.location).toBeAt('/orgsetting/id=123');
   });
 });

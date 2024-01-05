@@ -691,5 +691,23 @@
     "删除自定义字段": "删除自定义字段",
     "fieldSuccessMessage": "字段添加成功",
     "fieldRemovalSuccess": "字段删除成功"
+  },
+  "updateTimeout": {
+    "updateTimeout": "更新超时",
+    "currentTimeout": "当前超时",
+    "noTimeoutSet": "未设置超时（默认30分钟）",
+    "update": "更新",
+    "15min": "15分钟",
+    "30min": "30分钟",
+    "45min": "45分钟",
+    "60min": "60分钟",
+    "minutes": "分钟",
+    "successfullyUpdated": "已成功更新超时时长"
+  },
+  "confirmLogoutModal": {
+    "confirmLogout": "确认注销",
+    "logoutWarning": "由于长时间不活动，您即将注销。您要保持登录状态吗？",
+    "yes": "是",
+    "no": "否"
   }
 }

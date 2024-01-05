@@ -860,3 +860,9 @@ export const ORGANIZATION_CUSTOM_FIELDS = gql`
     }
   }
 `;
+
+export const GET_ORGANIZATION_TIMEOUT = gql`
+  query ($organizationId: ID!) {
+    getOrganizationTimeout(id: $organizationId)
+  }
+`;

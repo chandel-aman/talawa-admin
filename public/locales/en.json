@@ -711,5 +711,23 @@
     "Remove Custom Field": "Remove Custom Field",
     "fieldSuccessMessage": "Field added successfully",
     "fieldRemovalSuccess": "Field removed successfully"
+  },
+  "updateTimeout": {
+    "updateTimeout": "Update Timeout",
+    "currentTimeout": "Current Timeout",
+    "noTimeoutSet": "No timeout set (default 30 minutes)",
+    "update": "Update",
+    "15min": "15 min",
+    "30min": "30 min",
+    "45min": "45 min",
+    "60min": "60 min",
+    "minutes": "minutes",
+    "successfullyUpdated": "Updated timeout duration"
+  },
+  "confirmLogoutModal": {
+    "confirmLogout": "Confirm Logout",
+    "logoutWarning": "You are being logged out due to inactivity. Do you want to stay logged in?",
+    "yes": "Yes",
+    "no": "No"
   }
 }
