@@ -38,6 +38,18 @@ const MOCKS = [
   },
 ];
 
+const MOCKS_NO_TIMEOUT = [
+  {
+    request: {
+      query: GET_ORGANIZATION_TIMEOUT,
+      variables: { organizationId: 'org2' },
+    },
+    result: {
+      data: { getOrganizationTimeout: '0' },
+    },
+  },
+];
+
 const MOCKS_ERROR = [
   {
     request: {
@@ -50,6 +62,7 @@ const MOCKS_ERROR = [
 
 const link = new StaticMockLink(MOCKS, true);
 const link1 = new StaticMockLink(MOCKS_ERROR, true);
+const link2 = new StaticMockLink(MOCKS_NO_TIMEOUT, true);
 
 async function wait(ms = 500): Promise<void> {
   await act(() => {
@@ -113,5 +126,37 @@ describe('UpdateTimeout', () => {
 
     // Check if the error toast was shown
     expect(toast.error).toHaveBeenCalled();
+  });
+
+  test('Shows a default timeout when no timeout is found', async () => {
+    render(
+      <MockedProvider link={link2} addTypename={false}>
+        <I18nextProvider i18n={i18nForTest}>
+          <UpdateTimeout orgId="org2" />
+        </I18nextProvider>
+      </MockedProvider>
+    );
+
+    await wait();
+
+    const noTimeoutElement = screen.getByText(
+      'No timeout set (default 30 minutes)'
+    );
+    expect(noTimeoutElement).toBeInTheDocument();
+  });
+
+  test('Shows the current timeout when a timeout is set', async () => {
+    render(
+      <MockedProvider link={link} addTypename={false}>
+        <I18nextProvider i18n={i18nForTest}>
+          <UpdateTimeout orgId="org1" />
+        </I18nextProvider>
+      </MockedProvider>
+    );
+
+    await wait();
+
+    const timeoutElement = screen.getByText(/30 minutes/i);
+    expect(timeoutElement).toBeInTheDocument();
   });
 });
