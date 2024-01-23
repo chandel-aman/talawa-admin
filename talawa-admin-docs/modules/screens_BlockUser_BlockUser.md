@@ -20,4 +20,4 @@
 
 #### Defined in
 
-[src/screens/BlockUser/BlockUser.tsx:32](https://github.com/chandel-aman/talawa-admin/blob/97994b9/src/screens/BlockUser/BlockUser.tsx#L32)
+[src/screens/BlockUser/BlockUser.tsx:32](https://github.com/chandel-aman/talawa-admin/blob/d9abc9c/src/screens/BlockUser/BlockUser.tsx#L32)
