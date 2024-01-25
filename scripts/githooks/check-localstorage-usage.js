@@ -5,6 +5,8 @@ import path from 'path';
 
 import { execSync } from 'child_process';
 
+console.log('Checking for localStorage usage...');
+
 const getModifiedFiles = () => {
   try {
     const result = execSync('git diff --cached --name-only', {
