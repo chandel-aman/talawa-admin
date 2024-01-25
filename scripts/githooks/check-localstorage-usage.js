@@ -14,6 +14,7 @@ const getModifiedFiles = () => {
       encoding: 'utf-8',
     });
     console.log('inside try');
+    console.log(result);
     return result.trim().split('\n');
   } catch (error) {
     console.error('Error fetching modified files:', error.message);
