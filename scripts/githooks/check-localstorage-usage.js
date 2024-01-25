@@ -8,10 +8,12 @@ import { execSync } from 'child_process';
 console.log('Checking for localStorage usage...');
 
 const getModifiedFiles = () => {
+  console.log('inside getmodifiedfiles');
   try {
     const result = execSync('git diff --cached --name-only', {
       encoding: 'utf-8',
     });
+    console.log('inside try');
     return result.trim().split('\n');
   } catch (error) {
     console.error('Error fetching modified files:', error.message);
@@ -24,6 +26,7 @@ const files = getModifiedFiles();
 const filesWithLocalStorage = [];
 
 const checkLocalStorageUsage = (file) => {
+  console.log(`Checking file: ${file}`);
   if (!file) {
     return;
   }
@@ -34,16 +37,19 @@ const checkLocalStorageUsage = (file) => {
     file === scriptPath ||
     path.basename(file) === 'check-localstorage-usage.js'
   ) {
+    console.log(`Skipping self or script file: ${file}`);
     return;
   }
 
   const content = readFileSync(file, 'utf-8');
+  console.log(`File content: ${content}`);
 
   if (
     content.includes('localStorage.getItem') ||
     content.includes('localStorage.setItem') ||
     content.includes('localStorage.removeItem')
   ) {
+    console.log(`Found localStorage usage in file: ${file}`);
     filesWithLocalStorage.push(file);
   }
 };
