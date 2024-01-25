@@ -50,6 +50,9 @@ jobs:
       - name: Run linting check
         if: steps.changed-files.outputs.only_changed != 'true'
         run: npm run lint:check  
+      
+      - name: Check for localStorage Usage
+        run: chmod +x scripts/githooks/check-localstorage-usage.js && node scripts/githooks/check-localstorage-usage.js
 
       - name: Compare translation files
         run: |
