@@ -10,7 +10,6 @@ interface InterfaceStorageHelper {
 
 const PREFIX = 'Talawa-admin';
 
-
 /**
  * Generates the prefixed key for storage.
  * @param prefix - Prefix to be added to the key, common for all keys.
