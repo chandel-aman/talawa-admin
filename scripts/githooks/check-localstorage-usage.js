@@ -10,7 +10,7 @@ console.log('Checking for localStorage usage...');
 const getModifiedFiles = () => {
   console.log('inside getmodifiedfiles');
   try {
-    const result = execSync('git diff --cached --name-only', {
+    const result = execSync('git diff --name-only', {
       encoding: 'utf-8',
     });
     console.log('inside try');
