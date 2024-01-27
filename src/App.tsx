@@ -63,7 +63,7 @@ function app(): JSX.Element {
   // TODO: Fetch Installed plugin extras and store for use within MainContent and Side Panel Components.
 
   const { data, loading } = useQuery(CHECK_AUTH);
-  localStorage.setItem('testing', 'value');
+  localStorage.setItem('testing', 'again');
   useEffect(() => {
     if (data) {
       setItem('name', `${data.checkAuth.firstName} ${data.checkAuth.lastName}`);
