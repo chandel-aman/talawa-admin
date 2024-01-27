@@ -50,6 +50,9 @@ jobs:
       - name: Run linting check
         if: steps.changed-files.outputs.only_changed != 'true'
         run: npm run lint:check  
+
+      - name: Install jq
+        run: sudo apt-get install jq      
       
       - name: Set executable permissions
         run: chmod +x scripts/githooks/check-localstorage-usage.js
