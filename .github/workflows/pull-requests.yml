@@ -51,14 +51,17 @@ jobs:
         if: steps.changed-files.outputs.only_changed != 'true'
         run: npm run lint:check  
       
-      - name: Print modified files
-        run: git diff --cached --name-only
-      
       - name: Set executable permissions
         run: chmod +x scripts/githooks/check-localstorage-usage.js
       
       - name: Check for localStorage Usage
-        run: node scripts/githooks/check-localstorage-usage.js
+        run: |
+          changed_files=$(curl -s "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" | jq -r '.[].filename')
+          for file in $changed_files; do
+            if [[ "$file" == *.js || "$file" == *.jsx || "$file" == *.ts || "$file" == *.tsx ]]; then
+              node scripts/githooks/check-localstorage-usage.js "$file"
+            fi
+          done
       
 
       - name: Compare translation files
