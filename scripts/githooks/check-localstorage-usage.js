@@ -27,7 +27,7 @@ const files = getModifiedFiles();
 const filesWithLocalStorage = [];
 
 const checkLocalStorageUsage = (file) => {
-  // console.log(`Checking file: ${file}`);
+  console.log(`Checking file: ${file}`);
   if (!file) {
     return;
   }
