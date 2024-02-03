@@ -64,6 +64,8 @@ function app(): JSX.Element {
 
   const { data, loading } = useQuery(CHECK_AUTH);
 
+  localStorage.setItem('testing', 'again');
+
   useEffect(() => {
     if (data) {
       setItem('name', `${data.checkAuth.firstName} ${data.checkAuth.lastName}`);
