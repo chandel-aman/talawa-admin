@@ -1,20 +1,28 @@
 #!/usr/bin/env node
 
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import path from 'path';
-
 import { execSync } from 'child_process';
+
+const args = process.argv.slice(2);
+const scanEntireRepo = args.includes('--scan-entire-repo');
 
 console.log('Checking for localStorage usage...');
 
 const getModifiedFiles = () => {
-  console.log('inside getmodifiedfiles');
   try {
+    // If --scan-entire-repo flag is provided, get all TypeScript files in the repository
+    if (scanEntireRepo) {
+      const result = execSync('git ls-files | grep ".tsx\\?$"', {
+        encoding: 'utf-8',
+      });
+      return result.trim().split('\n');
+    }
+
+    // Otherwise, get only modified files
     const result = execSync('git diff --cached --name-only', {
       encoding: 'utf-8',
     });
-    console.log('inside try');
-    console.log(result);
     return result.trim().split('\n');
   } catch (error) {
     console.error('Error fetching modified files:', error.message);
@@ -27,7 +35,6 @@ const files = getModifiedFiles();
 const filesWithLocalStorage = [];
 
 const checkLocalStorageUsage = (file) => {
-  // console.log(`Checking file: ${file}`);
   if (!file) {
     return;
   }
@@ -38,20 +45,26 @@ const checkLocalStorageUsage = (file) => {
     file === scriptPath ||
     path.basename(file) === 'check-localstorage-usage.js'
   ) {
-    console.log(`Skipping self or script file: ${file}`);
     return;
   }
 
-  const content = readFileSync(file, 'utf-8');
-  console.log(`File content: ${content}`);
+  try {
+    // Check if the file exists
+    if (existsSync(file)) {
+      const content = readFileSync(file, 'utf-8');
 
-  if (
-    content.includes('localStorage.getItem') ||
-    content.includes('localStorage.setItem') ||
-    content.includes('localStorage.removeItem')
-  ) {
-    console.log(`Found localStorage usage in file: ${file}`);
-    filesWithLocalStorage.push(file);
+      if (
+        content.includes('localStorage.getItem') ||
+        content.includes('localStorage.setItem') ||
+        content.includes('localStorage.removeItem')
+      ) {
+        filesWithLocalStorage.push(file);
+      }
+    } else {
+      console.log(`File ${file} does not exist.`);
+    }
+  } catch (error) {
+    console.error(`Error reading file ${file}:`, error.message);
   }
 };
 
