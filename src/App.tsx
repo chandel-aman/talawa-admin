@@ -1,3 +1,4 @@
+// SKIP_LOCALSTORAGE_CHECK
 import React, { useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
