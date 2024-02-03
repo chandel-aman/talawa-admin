@@ -1,3 +1,4 @@
+// SKIP_LOCALSTORAGE_CHECK
 import { useMutation, useQuery } from '@apollo/client';
 import { Search } from '@mui/icons-material';
 import SortIcon from '@mui/icons-material/Sort';
