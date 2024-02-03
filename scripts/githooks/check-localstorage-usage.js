@@ -7,11 +7,8 @@ import { execSync } from 'child_process';
 const args = process.argv.slice(2);
 const scanEntireRepo = args.includes('--scan-entire-repo');
 
-console.log('Checking for localStorage usage...');
-
 const getModifiedFiles = () => {
   try {
-    // If --scan-entire-repo flag is provided, get all TypeScript files in the repository
     if (scanEntireRepo) {
       const result = execSync('git ls-files | grep ".tsx\\?$"', {
         encoding: 'utf-8',
@@ -35,17 +32,20 @@ const files = getModifiedFiles();
 const filesWithLocalStorage = [];
 
 const checkLocalStorageUsage = (file) => {
-  console.log(`Checking file: ${file}`);
   if (!file) {
     return;
   }
 
   const scriptPath = path.resolve(new URL(import.meta.url).pathname);
 
+  const fileName = path.basename(file);
+
   if (
-    file === scriptPath ||
-    path.basename(file) === 'check-localstorage-usage.js'
+    fileName === 'check-localstorage-usage.js' ||
+    fileName === 'useLocalstorage.test.ts' ||
+    fileName === 'useLocalstorage.ts'
   ) {
+    console.log(`Skipping file: ${file}`);
     return;
   }
 
