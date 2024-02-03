@@ -58,13 +58,7 @@ jobs:
         run: chmod +x scripts/githooks/check-localstorage-usage.js
       
       - name: Check for localStorage Usage
-        run: |
-          changed_files=$(curl -s "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" | jq -r '.[].filename')
-          for file in $changed_files; do
-            if [[ "$file" == *.js || "$file" == *.jsx || "$file" == *.ts || "$file" == *.tsx ]]; then
-              node scripts/githooks/check-localstorage-usage.js "$file"
-            fi
-          done
+        run:  node scripts/githooks/check-localstorage-usage.js --scan-entire-repo
       
 
       - name: Compare translation files
