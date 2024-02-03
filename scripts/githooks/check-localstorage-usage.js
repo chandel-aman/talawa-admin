@@ -7,6 +7,16 @@ import { execSync } from 'child_process';
 const args = process.argv.slice(2);
 const scanEntireRepo = args.includes('--scan-entire-repo');
 
+const containsSkipComment = (file) => {
+  try {
+    const content = readFileSync(file, 'utf-8');
+    return content.includes('// SKIP_LOCALSTORAGE_CHECK');
+  } catch (error) {
+    console.error(`Error reading file ${file}:`, error.message);
+    return false;
+  }
+};
+
 const getModifiedFiles = () => {
   try {
     if (scanEntireRepo) {
@@ -16,7 +26,6 @@ const getModifiedFiles = () => {
       return result.trim().split('\n');
     }
 
-    // Otherwise, get only modified files
     const result = execSync('git diff --cached --name-only', {
       encoding: 'utf-8',
     });
@@ -36,21 +45,20 @@ const checkLocalStorageUsage = (file) => {
     return;
   }
 
-  const scriptPath = path.resolve(new URL(import.meta.url).pathname);
-
   const fileName = path.basename(file);
 
+  // Skip files with specific names or containing a skip comment
   if (
     fileName === 'check-localstorage-usage.js' ||
     fileName === 'useLocalstorage.test.ts' ||
-    fileName === 'useLocalstorage.ts'
+    fileName === 'useLocalstorage.ts' ||
+    containsSkipComment(file)
   ) {
     console.log(`Skipping file: ${file}`);
     return;
   }
 
   try {
-    // Check if the file exists
     if (existsSync(file)) {
       const content = readFileSync(file, 'utf-8');
 
