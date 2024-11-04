@@ -17,28 +17,29 @@ const MOCKS = [
     request: {
       query: UPDATE_USER_MUTATION,
       variables: {
-        firstName: 'Noble',
-        lastName: 'Mittal',
-        createdAt: '2021-03-01',
+        firstName: 'John',
+        lastName: 'Doe',
+        createdAt: '2021-03-01T00:00:00.000Z',
         gender: 'MALE',
         phoneNumber: '+174567890',
         birthDate: '2024-03-01',
-        grade: 'GRADE_1',
-        empStatus: 'UNEMPLOYED',
+        grade: 'GRADUATE',
+        empStatus: 'PART_TIME',
         maritalStatus: 'SINGLE',
         address: 'random',
         state: 'random',
         country: 'IN',
-      },
-      result: {
-        data: {
-          updateUserProfile: {
-            _id: '453',
-          },
-        },
+        image: ''
       },
     },
-  },
+    result: {
+      data: {
+        updateUserProfile: {
+          _id: '453'
+        }
+      }
+    }
+  }
 ];
 
 const Mocks1 = [
@@ -371,4 +372,170 @@ describe('Testing Settings Screen [User Portal]', () => {
       act(() => closeMenuBtn.click());
     }
   });
+  test('handleUpdateUserDetails succeeds', async () => {
+    const mockToast = jest.fn();
+    jest.spyOn(window, 'setTimeout');
+    const mockSetItem = jest.fn();
+    
+    // Mock the toast.success function
+    jest.mock('react-toastify', () => ({
+      toast: {
+        success: mockToast
+      }
+    }));
+    
+    // Mock useLocalStorage hook
+    jest.mock('utils/useLocalstorage', () => ({
+      __esModule: true,
+      default: () => ({
+        setItem: mockSetItem
+      })
+    }));
+  
+    await act(async () => {
+      render(
+        <MockedProvider addTypename={false} link={link1}>
+          <BrowserRouter>
+            <Provider store={store}>
+              <I18nextProvider i18n={i18nForTest}>
+                <Settings />
+              </I18nextProvider>
+            </Provider>
+          </BrowserRouter>
+        </MockedProvider>,
+      );
+    });
+  
+    await wait();
+    
+    // Trigger the update
+    const updateBtn = screen.getByTestId('updateUserBtn');
+    await act(async () => {
+      userEvent.click(updateBtn);
+    });
+    
+    await wait();
+    
+    // Verify the success flow
+    expect(mockToast).toHaveBeenCalled();
+    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 500);
+    expect(mockSetItem).toHaveBeenCalledWith('name', 'John Doe');
+  });
+  
+  test('handleUpdateUserDetails handles error', async () => {
+    const errorMock = [
+      {
+        request: {
+          query: UPDATE_USER_MUTATION,
+          variables: {
+            firstName: 'John',
+            lastName: 'Doe',
+            // ... other variables
+          },
+        },
+        error: new Error('Update failed'),
+      },
+    ];
+  
+    const errorLink = new StaticMockLink(errorMock, true);
+    const mockErrorHandler = jest.fn();
+    
+    // Mock the errorHandler
+    jest.mock('utils/errorHandler', () => ({
+      errorHandler: mockErrorHandler
+    }));
+  
+    await act(async () => {
+      render(
+        <MockedProvider addTypename={false} link={errorLink}>
+          <BrowserRouter>
+            <Provider store={store}>
+              <I18nextProvider i18n={i18nForTest}>
+                <Settings />
+              </I18nextProvider>
+            </Provider>
+          </BrowserRouter>
+        </MockedProvider>,
+      );
+    });
+  
+    await wait();
+    
+    // Trigger the update
+    const updateBtn = screen.getByTestId('updateUserBtn');
+    await act(async () => {
+      userEvent.click(updateBtn);
+    });
+    
+    await wait();
+    
+    // Verify error handler was called
+    expect(mockErrorHandler).toHaveBeenCalled();
+  });
+  test('handleOnImageUpdate works correctly', async () => {
+  const mockSetItem = jest.fn();
+  
+  // Add a new mock for refetch
+  const refetchMock = {
+    request: {
+      query: CHECK_AUTH
+    },
+    result: {
+      data: {
+        checkAuth: {
+          image: 'new-image-url.jpg'
+        }
+      }
+    }
+  };
+  
+  // Create a new link with the refetch mock
+  const refetchLink = new StaticMockLink([...Mocks1, refetchMock], true);
+
+  await act(async () => {
+    render(
+      <MockedProvider addTypename={false} link={refetchLink}>
+        <BrowserRouter>
+          <Provider store={store}>
+            <I18nextProvider i18n={i18nForTest}>
+              <Settings />
+            </I18nextProvider>
+          </Provider>
+        </BrowserRouter>
+      </MockedProvider>,
+    );
+  });
+
+  await wait();
+
+  // Mock useLocalStorage hook
+  jest.mock('utils/useLocalstorage', () => ({
+    __esModule: true,
+    default: () => ({
+      setItem: mockSetItem
+    })
+  }));
+
+  // Get the file input and trigger image upload
+  const fileInp = screen.getByTestId('fileInput');
+  fileInp.style.display = 'block';
+  
+  const imageFile = new File(['(⌐□_□)'], 'new-profile-image.jpg', {
+    type: 'image/jpeg',
+  });
+  
+  await act(async () => {
+    userEvent.upload(fileInp, imageFile);
+  });
+  
+  await wait();
+
+  // Verify setItem was called with new image
+  expect(mockSetItem).toHaveBeenCalledWith('image', 'new-image-url.jpg');
+  
+  // Verify image in userDetails was updated
+  const profileImage = screen.getAllByAltText('profile picture')[0] as HTMLImageElement;
+  expect(profileImage.src).toContain('new-image-url.jpg');
+});
+
 });

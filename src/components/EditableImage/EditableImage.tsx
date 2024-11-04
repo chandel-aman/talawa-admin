@@ -129,6 +129,7 @@ const EditableImage: React.FC<InterfaceEditableImageProps> = ({
               size="xl"
               shape={shape}
               avatarStyle={styles.modalImage}
+              
             />
           )
         )}
@@ -139,6 +140,7 @@ const EditableImage: React.FC<InterfaceEditableImageProps> = ({
         onChange={handleImageChange}
         style={{ display: 'none' }}
         ref={fileInputRef}
+        
       />
     </div>
   );

@@ -14,6 +14,7 @@ import {
 
 const link = new StaticMockLink(MOCKS, true);
 
+
 async function wait(ms = 500): Promise<void> {
   await act(() => {
     return new Promise((resolve) => {
@@ -22,10 +23,38 @@ async function wait(ms = 500): Promise<void> {
   });
 }
 
-describe('Testing Organization Update', () => {
+jest.mock('react-toastify', () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+  },
+}));
+
+// Mock the localStorage functionality
+const mockGetItem = jest.fn();
+jest.mock('utils/useLocalstorage', () => ({
+  __esModule: true,
+  default: () => ({
+    getItem: mockGetItem,
+  }),
+}));
+
+describe('OrgUpdate Image Upload Tests', () => {
   const props = {
     orgId: '123',
   };
+
+  beforeEach(() => {
+    // Properly type the global fetch mock
+    global.fetch = jest.fn() as jest.MockedFunction<typeof global.fetch>;
+    mockGetItem.mockReturnValue('mock-token');
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+  
 
   const formData = {
     name: 'Palisadoes Organization',

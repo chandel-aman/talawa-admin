@@ -389,8 +389,8 @@ function orgUpdate(props: InterfaceOrgUpdateProps): JSX.Element {
             type="file"
             multiple={false}
             onChange={handleImageChange}
-            data-testid="organisationImage"
-          />
+            data-testid="organisationImage"  
+            />
           <div className="d-flex justify-content-end">
             <Button
               variant="success"

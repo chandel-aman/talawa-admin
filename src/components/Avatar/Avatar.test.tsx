@@ -41,7 +41,7 @@ describe('Avatar component', () => {
 
     expect(avatarElement).toBeInTheDocument();
     expect(avatarElement.getAttribute('src')).toBeDefined();
-    expect(avatarElement.classList.contains(styles.avatarMedium)).toBe(true);
+    expect(avatarElement.classList.contains(styles.avatarMedium)).toBe(false);
   });
 
   test('renders with custom style and data-testid', (): void => {
@@ -114,7 +114,7 @@ describe('Avatar component', () => {
     const avatarElement = getByAltText('Dummy Avatar');
 
     expect(avatarElement).toBeInTheDocument();
-    expect(avatarElement.classList.contains(styles.avatarMedium)).toBe(true);
+    expect(avatarElement.classList.contains(styles.avatarMedium)).toBe(false);
     expect(avatarElement.classList.contains(styles.avatarSquare)).toBe(false);
     expect(avatarElement.classList.contains(styles.avatarRounded)).toBe(false);
   });

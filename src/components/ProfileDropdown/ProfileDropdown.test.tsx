@@ -145,4 +145,41 @@ describe('ProfileDropdown Component', () => {
       expect(global.window.location.pathname).toBe('/user/settings');
     });
   });
+  describe('ProfileDropdown Routing Logic', () => {
+    beforeEach(() => {
+      localStorage.clear();
+      setItem('FirstName', 'John');
+      setItem('LastName', 'Doe');
+      setItem('id', '123');
+    });
+  
+    test('routes to /user/settings when userRole is User', async () => {
+      // Set up User role
+      setItem('SuperAdmin', false);
+      setItem('AdminFor', []);
+  
+      render(
+        <MockedProvider mocks={MOCKS} addTypename={false}>
+          <BrowserRouter>
+            <I18nextProvider i18n={i18nForTest}>
+              <ProfileDropdown />
+            </I18nextProvider>
+          </BrowserRouter>
+        </MockedProvider>
+      );
+  
+      // Open dropdown
+      await act(async () => {
+        userEvent.click(screen.getByTestId('togDrop'));
+      });
+  
+      // Click profile button
+      await act(async () => {
+        userEvent.click(screen.getByTestId('profileBtn'));
+      });
+  
+      // Verify navigation to user settings
+      expect(window.location.pathname).toBe('/user/settings');
+    });
+  });
 });

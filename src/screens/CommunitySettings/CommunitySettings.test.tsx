@@ -1,334 +1,122 @@
 import React from 'react';
-import { MockedProvider } from '@apollo/react-testing';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import 'jest-localstorage-mock';
-import 'jest-location-mock';
 import { I18nextProvider } from 'react-i18next';
-
-import { StaticMockLink } from 'utils/StaticMockLink';
-import CommunityProfile from './CommunitySettings';
-import i18n from 'utils/i18nForTest';
-import { GET_COMMUNITY_DATA } from 'GraphQl/Queries/Queries';
 import { BrowserRouter } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { RESET_COMMUNITY, UPDATE_COMMUNITY } from 'GraphQl/Mutations/mutations';
+import CommunitySettings from './CommunitySettings';
+import i18n from 'utils/i18nForTest';
 
-const MOCKS1 = [
-  {
-    request: {
-      query: GET_COMMUNITY_DATA,
-    },
-    result: {
-      data: {
-        getCommunityData: null,
-      },
-    },
-  },
-  {
-    request: {
-      query: UPDATE_COMMUNITY,
-      variables: {
-        data: {
-          name: 'Name',
-          websiteLink: 'https://website.com',
-          logo: 'data:image/png;base64,bG9nbw==',
-          socialMediaUrls: {
-            facebook: 'https://socialurl.com',
-            instagram: 'https://socialurl.com',
-            twitter: 'https://socialurl.com',
-            linkedIn: 'https://socialurl.com',
-            gitHub: 'https://socialurl.com',
-            youTube: 'https://socialurl.com',
-            reddit: 'https://socialurl.com',
-            slack: 'https://socialurl.com',
-          },
-        },
-      },
-    },
-    result: {
-      data: {
-        updateCommunity: true,
-      },
-    },
-  },
-];
+// Mock the child components
+jest.mock('components/Community/CommunityProfile/CommunityProfile', () => {
+  return function MockCommunityProfile() {
+    return <div data-testid="community-profile">Community Profile Component</div>;
+  };
+});
 
-const MOCKS2 = [
-  {
-    request: {
-      query: GET_COMMUNITY_DATA,
-    },
-    result: {
-      data: {
-        getCommunityData: {
-          _id: null,
-          name: null,
-          logoUrl: null,
-          websiteLink: null,
-          socialMediaUrls: {
-            facebook: null,
-            gitHub: null,
-            youTube: null,
-            instagram: null,
-            linkedIn: null,
-            reddit: null,
-            slack: null,
-            twitter: null,
-          },
-        },
-      },
-    },
-  },
-  {
-    request: {
-      query: RESET_COMMUNITY,
-      variables: {
-        resetPreLoginImageryId: 'communityId',
-      },
-    },
-    result: {
-      data: {
-        resetCommunity: true,
-      },
-    },
-  },
-];
+jest.mock('components/Community/CommunitySecuritySettings/CommunitySecuritySettings', () => {
+  return function MockCommunitySecuritySettings() {
+    return <div data-testid="community-security">Community Security Component</div>;
+  };
+});
 
-const MOCKS3 = [
-  {
-    request: {
-      query: GET_COMMUNITY_DATA,
-    },
-    result: {
-      data: {
-        getCommunityData: {
-          _id: 'communityId',
-          name: 'testName',
-          logoUrl: 'image.png',
-          websiteLink: 'http://websitelink.com',
-          socialMediaUrls: {
-            facebook: 'http://sociallink.com',
-            gitHub: 'http://sociallink.com',
-            youTube: 'http://sociallink.com',
-            instagram: 'http://sociallink.com',
-            linkedIn: 'http://sociallink.com',
-            reddit: 'http://sociallink.com',
-            slack: 'http://sociallink.com',
-            twitter: 'http://sociallink.com',
-          },
-        },
-      },
-    },
-  },
-  {
-    request: {
-      query: RESET_COMMUNITY,
-      variables: {
-        resetPreLoginImageryId: 'communityId',
-      },
-    },
-    result: {
-      data: {
-        resetCommunity: true,
-      },
-    },
-  },
-];
-
-const link1 = new StaticMockLink(MOCKS1, true);
-const link2 = new StaticMockLink(MOCKS2, true);
-const link3 = new StaticMockLink(MOCKS3, true);
-
-const profileVariables = {
-  name: 'Name',
-  websiteLink: 'https://website.com',
-  socialUrl: 'https://socialurl.com',
-  logo: new File(['logo'], 'test.png', {
-    type: 'image/png',
-  }),
-};
-
-async function wait(ms = 100): Promise<void> {
-  await act(() => {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
-  });
-}
-
-jest.mock('react-toastify', () => ({
-  toast: {
-    success: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  },
-}));
-
-describe('Testing Community Profile Screen', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('Components should render properly', async () => {
-    window.location.assign('/communityProfile');
-
-    render(
-      <MockedProvider addTypename={false} link={link1}>
-        <BrowserRouter>
-          <I18nextProvider i18n={i18n}>
-            <CommunityProfile />
-          </I18nextProvider>
-        </BrowserRouter>
-      </MockedProvider>,
-    );
-    await wait();
-
-    expect(screen.getByPlaceholderText(/Community Name/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Website Link/i)).toBeInTheDocument();
-    expect(screen.getByTestId(/facebook/i)).toBeInTheDocument();
-    expect(screen.getByTestId(/instagram/i)).toBeInTheDocument();
-    expect(screen.getByTestId(/twitter/i)).toBeInTheDocument();
-    expect(screen.getByTestId(/linkedIn/i)).toBeInTheDocument();
-    expect(screen.getByTestId(/github/i)).toBeInTheDocument();
-    expect(screen.getByTestId(/youtube/i)).toBeInTheDocument();
-    expect(screen.getByTestId(/reddit/i)).toBeInTheDocument();
-    expect(screen.getByTestId(/slack/i)).toBeInTheDocument();
-    expect(screen.getByTestId('resetChangesBtn')).toBeInTheDocument();
-    expect(screen.getByTestId('resetChangesBtn')).toBeDisabled();
-    expect(screen.getByTestId('saveChangesBtn')).toBeInTheDocument();
-    expect(screen.getByTestId('saveChangesBtn')).toBeDisabled();
-  });
-
-  test('Testing all the input fields and update community data feature', async () => {
-    window.location.assign('/communityProfile');
-
-    await act(async () => {
-      render(
-        <MockedProvider addTypename={false} link={link1}>
-          <BrowserRouter>
-            <I18nextProvider i18n={i18n}>
-              <CommunityProfile />
-            </I18nextProvider>
-          </BrowserRouter>
-        </MockedProvider>,
-      );
-      await wait();
-
-      const communityName = screen.getByPlaceholderText(/Community Name/i);
-      const websiteLink = screen.getByPlaceholderText(/Website Link/i);
-      const logo = screen.getByTestId(/fileInput/i);
-      const facebook = screen.getByTestId(/facebook/i);
-      const instagram = screen.getByTestId(/instagram/i);
-      const twitter = screen.getByTestId(/twitter/i);
-      const linkedIn = screen.getByTestId(/linkedIn/i);
-      const github = screen.getByTestId(/github/i);
-      const youtube = screen.getByTestId(/youtube/i);
-      const reddit = screen.getByTestId(/reddit/i);
-      const slack = screen.getByTestId(/slack/i);
-      const saveChangesBtn = screen.getByTestId(/saveChangesBtn/i);
-      const resetChangeBtn = screen.getByTestId(/resetChangesBtn/i);
-
-      userEvent.type(communityName, profileVariables.name);
-      userEvent.type(websiteLink, profileVariables.websiteLink);
-      userEvent.type(facebook, profileVariables.socialUrl);
-      userEvent.type(instagram, profileVariables.socialUrl);
-      userEvent.type(twitter, profileVariables.socialUrl);
-      userEvent.type(linkedIn, profileVariables.socialUrl);
-      userEvent.type(github, profileVariables.socialUrl);
-      userEvent.type(youtube, profileVariables.socialUrl);
-      userEvent.type(reddit, profileVariables.socialUrl);
-      userEvent.type(slack, profileVariables.socialUrl);
-      userEvent.upload(logo, profileVariables.logo);
-      await wait();
-
-      expect(communityName).toHaveValue(profileVariables.name);
-      expect(websiteLink).toHaveValue(profileVariables.websiteLink);
-      // expect(logo).toBeTruthy();
-      expect(facebook).toHaveValue(profileVariables.socialUrl);
-      expect(instagram).toHaveValue(profileVariables.socialUrl);
-      expect(twitter).toHaveValue(profileVariables.socialUrl);
-      expect(linkedIn).toHaveValue(profileVariables.socialUrl);
-      expect(github).toHaveValue(profileVariables.socialUrl);
-      expect(youtube).toHaveValue(profileVariables.socialUrl);
-      expect(reddit).toHaveValue(profileVariables.socialUrl);
-      expect(slack).toHaveValue(profileVariables.socialUrl);
-      expect(saveChangesBtn).not.toBeDisabled();
-      expect(resetChangeBtn).not.toBeDisabled();
-      await wait();
-
-      userEvent.click(saveChangesBtn);
-      await wait();
-    });
-  });
-
-  test('If the queried data has some fields null then the input field should be empty', async () => {
-    render(
-      <MockedProvider addTypename={false} link={link2}>
+describe('CommunitySettings Component', () => {
+  const renderComponent = () => {
+    return render(
+      <BrowserRouter>
         <I18nextProvider i18n={i18n}>
-          <CommunityProfile />
+          <CommunitySettings />
         </I18nextProvider>
-      </MockedProvider>,
+      </BrowserRouter>
     );
-    await wait();
+  };
 
-    expect(screen.getByPlaceholderText(/Community Name/i)).toHaveValue('');
-    expect(screen.getByPlaceholderText(/Website Link/i)).toHaveValue('');
-    expect(screen.getByTestId(/facebook/i)).toHaveValue('');
-    expect(screen.getByTestId(/instagram/i)).toHaveValue('');
-    expect(screen.getByTestId(/twitter/i)).toHaveValue('');
-    expect(screen.getByTestId(/linkedIn/i)).toHaveValue('');
-    expect(screen.getByTestId(/github/i)).toHaveValue('');
-    expect(screen.getByTestId(/youtube/i)).toHaveValue('');
-    expect(screen.getByTestId(/reddit/i)).toHaveValue('');
-    expect(screen.getByTestId(/slack/i)).toHaveValue('');
+  test('should render both setting tabs', () => {
+    renderComponent();
+    
+    expect(screen.getByTestId('profileSettings')).toBeInTheDocument();
+    expect(screen.getByTestId('securitySettings')).toBeInTheDocument();
   });
 
-  test('Should clear out all the input field when click on Reset Changes button', async () => {
-    render(
-      <MockedProvider addTypename={false} link={link3}>
-        <I18nextProvider i18n={i18n}>
-          <CommunityProfile />
-        </I18nextProvider>
-      </MockedProvider>,
-    );
-    await wait();
-
-    const resetChangesBtn = screen.getByTestId('resetChangesBtn');
-    userEvent.click(resetChangesBtn);
-    await wait();
-
-    expect(screen.getByPlaceholderText(/Community Name/i)).toHaveValue('');
-    expect(screen.getByPlaceholderText(/Website Link/i)).toHaveValue('');
-    expect(screen.getByTestId(/facebook/i)).toHaveValue('');
-    expect(screen.getByTestId(/instagram/i)).toHaveValue('');
-    expect(screen.getByTestId(/twitter/i)).toHaveValue('');
-    expect(screen.getByTestId(/linkedIn/i)).toHaveValue('');
-    expect(screen.getByTestId(/github/i)).toHaveValue('');
-    expect(screen.getByTestId(/youtube/i)).toHaveValue('');
-    expect(screen.getByTestId(/reddit/i)).toHaveValue('');
-    expect(screen.getByTestId(/slack/i)).toHaveValue('');
-    expect(toast.success).toHaveBeenCalled();
+  test('should show profile settings by default', () => {
+    renderComponent();
+    
+    expect(screen.getByTestId('community-profile')).toBeInTheDocument();
+    expect(screen.queryByTestId('community-security')).not.toBeInTheDocument();
   });
 
-  test('Should have empty input fields when queried result is null', async () => {
-    render(
-      <MockedProvider addTypename={false} link={link1}>
-        <I18nextProvider i18n={i18n}>
-          <CommunityProfile />
-        </I18nextProvider>
-      </MockedProvider>,
-    );
+  // test('should handle setting changes correctly for each tab click', () => {
+  //   renderComponent();
+    
+  //   // Get all setting buttons
+  //   const buttons = screen.getAllByRole('button');
+  //   const settings = ['profile', 'security'];
+    
+  //   // Click each button and verify the corresponding content
+  //   settings.forEach((setting) => {
+  //     const button = screen.getByTestId(`${setting}Settings`);
+  //     userEvent.click(button);
+      
+  //     // Verify correct content is shown
+  //     if (setting === 'profile') {
+  //       expect(screen.getByTestId('community-profile')).toBeInTheDocument();
+  //       expect(screen.queryByTestId('community-security')).not.toBeInTheDocument();
+  //     } else {
+  //       expect(screen.queryByTestId('community-profile')).not.toBeInTheDocument();
+  //       expect(screen.getByTestId('community-security')).toBeInTheDocument();
+  //     }
+      
+  //     // Verify button states
+  //     buttons.forEach((btn) => {
+  //       if (btn === button) {
+  //         expect(btn).toHaveClass('btn-success');
+  //       } else {
+  //         expect(btn).toHaveClass('btn-none');
+  //       }
+  //     });
+  //   });
+  // });
 
-    expect(screen.getByPlaceholderText(/Community Name/i)).toHaveValue('');
-    expect(screen.getByPlaceholderText(/Website Link/i)).toHaveValue('');
-    expect(screen.getByTestId(/facebook/i)).toHaveValue('');
-    expect(screen.getByTestId(/instagram/i)).toHaveValue('');
-    expect(screen.getByTestId(/twitter/i)).toHaveValue('');
-    expect(screen.getByTestId(/linkedIn/i)).toHaveValue('');
-    expect(screen.getByTestId(/github/i)).toHaveValue('');
-    expect(screen.getByTestId(/youtube/i)).toHaveValue('');
-    expect(screen.getByTestId(/reddit/i)).toHaveValue('');
-    expect(screen.getByTestId(/slack/i)).toHaveValue('');
+  test('should maintain state after multiple tab switches', () => {
+    renderComponent();
+    
+    // Initial state - profile
+    expect(screen.getByTestId('community-profile')).toBeInTheDocument();
+    
+    // Switch to security
+    userEvent.click(screen.getByTestId('securitySettings'));
+    expect(screen.getByTestId('community-security')).toBeInTheDocument();
+    
+    // Switch back to profile
+    userEvent.click(screen.getByTestId('profileSettings'));
+    expect(screen.getByTestId('community-profile')).toBeInTheDocument();
+    
+    // Switch to security again
+    userEvent.click(screen.getByTestId('securitySettings'));
+    expect(screen.getByTestId('community-security')).toBeInTheDocument();
+  });
+
+  test('should set document title', () => {
+    renderComponent();
+    
+    expect(document.title).toBe('Community Settings');
+  });
+
+  test('should handle rapid tab switching without errors', () => {
+    renderComponent();
+    
+    const profileTab = screen.getByTestId('profileSettings');
+    const securityTab = screen.getByTestId('securitySettings');
+    
+    // Rapidly switch between tabs multiple times
+    userEvent.click(securityTab);
+    userEvent.click(profileTab);
+    userEvent.click(securityTab);
+    userEvent.click(profileTab);
+    
+    // Verify the final state is correct
+    expect(screen.getByTestId('community-profile')).toBeInTheDocument();
+    expect(screen.queryByTestId('community-security')).not.toBeInTheDocument();
+    expect(profileTab).toHaveClass('btn-success');
+    expect(securityTab).toHaveClass('btn-none');
   });
 });

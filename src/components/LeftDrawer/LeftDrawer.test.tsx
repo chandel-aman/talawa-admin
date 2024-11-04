@@ -83,7 +83,7 @@ describe('Testing Left Drawer component for SUPERADMIN', () => {
 
     expect(screen.getByText('My Organizations')).toBeInTheDocument();
     expect(screen.getByText('Users')).toBeInTheDocument();
-    expect(screen.getByText('Community Profile')).toBeInTheDocument();
+    expect(screen.getByText('Community Settings')).toBeInTheDocument();
     expect(screen.getByText('Talawa Admin Portal')).toBeInTheDocument();
 
     const orgsBtn = screen.getByTestId(/orgsBtn/i);
@@ -130,6 +130,30 @@ describe('Testing Left Drawer component for SUPERADMIN', () => {
         </MockedProvider>,
       );
     });
+  });
+  test('Testing Drawer when hideDrawer is null', async () => {
+    const tempProps: InterfaceLeftDrawerProps = {
+      ...props,
+      hideDrawer: null,
+      setHideDrawer: jest.fn(),
+    };
+  
+    await act(async () => {
+      render(
+        <MockedProvider addTypename={false} link={link}>
+          <BrowserRouter>
+            <I18nextProvider i18n={i18nForTest}>
+              <LeftDrawer {...tempProps} />
+            </I18nextProvider>
+          </BrowserRouter>
+        </MockedProvider>,
+      );
+    });
+    const drawerContainer = screen.getByTestId('leftDrawerContainer');
+    expect(drawerContainer.className).toContain('hideElemByDefault');
+
+    expect(screen.getByText('My Organizations')).toBeInTheDocument();
+    expect(screen.getByText('Talawa Admin Portal')).toBeInTheDocument();
   });
 
   test('Testing Drawer when hideDrawer is false', async () => {
