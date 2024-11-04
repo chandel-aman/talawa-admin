@@ -25,7 +25,7 @@ import SubTags from 'screens/SubTags/SubTags';
 import PageNotFound from 'screens/PageNotFound/PageNotFound';
 import Requests from 'screens/Requests/Requests';
 import Users from 'screens/Users/Users';
-import CommunityProfile from 'screens/CommunityProfile/CommunityProfile';
+import CommunityProfile from 'components/Community/CommunityProfile/CommunityProfile';
 import OrganizationVenues from 'screens/OrganizationVenues/OrganizationVenues';
 
 import React, { useEffect } from 'react';

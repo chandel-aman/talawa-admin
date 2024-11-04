@@ -48,7 +48,6 @@ export const UPDATE_ORGANIZATION_MUTATION = gql`
     $address: AddressInput
     $userRegistrationRequired: Boolean
     $visibleInSearch: Boolean
-    $file: String
   ) {
     updateOrganization(
       id: $id
@@ -59,7 +58,6 @@ export const UPDATE_ORGANIZATION_MUTATION = gql`
         visibleInSearch: $visibleInSearch
         address: $address
       }
-      file: $file
     ) {
       _id
     }
@@ -96,7 +94,6 @@ export const UPDATE_USER_MUTATION = gql`
     $address: String
     $state: String
     $country: String
-    $image: String
     $appLanguageCode: String
   ) {
     updateUserProfile(
@@ -113,7 +110,6 @@ export const UPDATE_USER_MUTATION = gql`
         address: { line1: $address, state: $state, countryCode: $country }
         appLanguageCode: $appLanguageCode
       }
-      file: $image
     ) {
       _id
     }
@@ -680,6 +676,18 @@ export const DONATE_TO_ORGANIZATION = gql`
       nameOfUser
       nameOfOrg
     }
+  }
+`;
+
+export const CREATE_BACKUP = gql`
+  mutation CreateBackup($input: CreateBackupInput!) {
+    createBackup(input: $input)
+  }
+`;
+
+export const RESTORE_BACKUP = gql`
+  mutation RestoreBackup($id: ID!) {
+    restoreBackup(id: $id)
   }
 `;
 

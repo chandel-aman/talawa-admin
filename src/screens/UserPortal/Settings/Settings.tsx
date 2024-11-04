@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './Settings.module.css';
 import { Button, Card, Col, Form, Row } from 'react-bootstrap';
-import convertToBase64 from 'utils/convertToBase64';
 import { UPDATE_USER_MUTATION } from 'GraphQl/Mutations/mutations';
 import { useMutation, useQuery } from '@apollo/client';
 import { errorHandler } from 'utils/errorHandler';
@@ -54,7 +53,9 @@ export default function settings(): JSX.Element {
   }, []);
 
   const { setItem } = useLocalStorage();
-  const { data } = useQuery(CHECK_AUTH, { fetchPolicy: 'network-only' });
+  const { data, refetch } = useQuery(CHECK_AUTH, {
+    fetchPolicy: 'network-only',
+  });
   const [updateUserDetails] = useMutation(UPDATE_USER_MUTATION);
 
   const [userDetails, setUserDetails] = useState({
@@ -78,10 +79,6 @@ export default function settings(): JSX.Element {
    * Ref to store the original image URL for comparison during updates.
    */
   const originalImageState = React.useRef<string>('');
-  /**
-   * Ref to access the file input element for image uploads.
-   */
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   /**
    * Handles the update of user details.
@@ -124,15 +121,6 @@ export default function settings(): JSX.Element {
       ...prevState,
       [fieldName]: value,
     }));
-  };
-
-  /**
-   * Triggers the file input click event to open the file picker dialog.
-   */
-  const handleImageUpload = (): void => {
-    if (fileInputRef.current) {
-      (fileInputRef.current as HTMLInputElement).click();
-    }
   };
 
   /**
@@ -210,6 +198,14 @@ export default function settings(): JSX.Element {
     }
   }, [data]);
 
+  const handleOnImageUpdate = async (): Promise<void> => {
+    const { data } = await refetch();
+    if (data) {
+      setItem('image', data.checkAuth?.image);
+      setUserDetails((prev) => ({ ...prev, image: data.checkAuth?.image }));
+    }
+  };
+
   return (
     <>
       {hideDrawer ? (
@@ -259,6 +255,7 @@ export default function settings(): JSX.Element {
                 createdAt={userDetails.createdAt}
                 email={userDetails.email}
                 image={userDetails.image}
+                onImageUpdate={handleOnImageUpdate}
               />
             </Col>
             <Col lg={7}>
@@ -368,47 +365,6 @@ export default function settings(): JSX.Element {
                         className={`${styles.cardControl}`}
                         data-testid="inputPhoneNumber"
                       />
-                    </Col>
-                    <Col lg={4}>
-                      <Form.Label
-                        htmlFor="postphoto"
-                        className={`${styles.cardLabel}`}
-                      >
-                        {tCommon('displayImage')}
-                      </Form.Label>
-                      <div>
-                        <Button
-                          className={`${styles.cardButton}`}
-                          onClick={handleImageUpload}
-                          data-testid="uploadImageBtn"
-                        >
-                          {t('chooseFile')}
-                        </Button>
-                        <Form.Control
-                          accept="image/*"
-                          id="postphoto"
-                          name="photo"
-                          type="file"
-                          className={styles.cardControl}
-                          data-testid="fileInput"
-                          multiple={false}
-                          ref={fileInputRef}
-                          onChange={
-                            /* istanbul ignore next */
-                            async (
-                              e: React.ChangeEvent<HTMLInputElement>,
-                            ): Promise<void> => {
-                              const target = e.target as HTMLInputElement;
-                              const file = target.files && target.files[0];
-                              if (file) {
-                                const image = await convertToBase64(file);
-                                setUserDetails({ ...userDetails, image });
-                              }
-                            }
-                          }
-                          style={{ display: 'none' }}
-                        />
-                      </div>
                     </Col>
                   </Row>
                   <Row className="mb-1">
@@ -618,6 +574,7 @@ export default function settings(): JSX.Element {
                 createdAt={userDetails.createdAt}
                 email={userDetails.email}
                 image={userDetails.image}
+                onImageUpdate={handleOnImageUpdate}
               />
               <DeleteUser />
               <OtherSettings />

@@ -125,6 +125,27 @@
   gap: 2rem;
   margin-bottom: 2rem;
 }
+
+.actionButtons {
+  width: 100%;
+  height: min-content;
+  flex-direction: row;
+  justify-content: end;
+}
+
+.userEmail {
+  font-weight: bold;
+  color: #707070;
+}
+
+.dateJoined {
+  font-size: 0.85rem;
+}
+
+.imageAndActionContainer {
+  flex-direction: row;
+}
+
 @media screen and (max-width: 1200px) {
   .justifysp {
     padding-left: 55px;

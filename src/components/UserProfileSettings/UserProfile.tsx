@@ -1,10 +1,13 @@
-import Avatar from 'components/Avatar/Avatar';
 import React from 'react';
-import { Button, Card } from 'react-bootstrap';
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import { Card } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import styles from './UserProfileSettings.module.css';
-import { Tooltip as ReactTooltip } from 'react-tooltip';
+import useLocalStorage from 'utils/useLocalstorage';
+import { toast } from 'react-toastify';
+import { errorHandler } from 'utils/errorHandler';
+import { CalendarIcon } from '@mui/x-date-pickers';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import EditableImage from 'components/EditableImage/EditableImage';
 
 interface InterfaceUserProfile {
   firstName: string;
@@ -12,6 +15,7 @@ interface InterfaceUserProfile {
   createdAt: string;
   email: string;
   image: string;
+  onImageUpdate: () => Promise<void>;
 }
 const joinedDate = (param: string): string => {
   const date = new Date(param);
@@ -41,65 +45,105 @@ const UserProfile: React.FC<InterfaceUserProfile> = ({
   createdAt,
   email,
   image,
+  onImageUpdate,
 }): JSX.Element => {
   const { t } = useTranslation('translation', {
     keyPrefix: 'settings',
   });
   const { t: tCommon } = useTranslation('common');
+  const { getItem } = useLocalStorage();
+
+  const handleSave = async (file: File): Promise<void> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const accessToken = getItem('token');
+      const response = await fetch(
+        `${process.env.REACT_APP_TALAWA_REST_URL}/user/update-profile-picture`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      );
+
+      if (response.ok) {
+        toast.success(t('profileChangedMsg'));
+        await onImageUpdate();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update profile');
+      }
+    } catch (error: unknown) {
+      errorHandler(t, error as Error);
+    }
+  };
+
+  const handleDelete = async (): Promise<void> => {
+    try {
+      const accessToken = getItem('token');
+      const response = await fetch(
+        `${process.env.REACT_APP_TALAWA_REST_URL}/user/update-profile-picture`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      );
+
+      if (response.ok) {
+        toast.success(t('profilePictureDeletedMsg'));
+        await onImageUpdate();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete profile picture');
+      }
+    } catch (error: unknown) {
+      errorHandler(t, error as Error);
+    }
+  };
 
   return (
-    <>
-      <Card border="0" className="rounded-4 mb-4">
-        <div className={styles.cardHeader}>
-          <div className={styles.cardTitle}>{t('profileDetails')}</div>
+    <Card border="0" className="rounded-4 mb-4">
+      <div className={styles.cardHeader}>
+        <div className={styles.cardTitle}>{t('profileDetails')}</div>
+      </div>
+      <Card.Body className={styles.cardBody}>
+        <div className="d-flex align-items-center gap-3 mb-2">
+          <EditableImage
+            src={image}
+            alt={`${firstName} ${lastName}`}
+            name={`${firstName} ${lastName}`}
+            size="md"
+            shape="circle"
+            onSave={handleSave}
+            onDelete={handleDelete}
+            tooltipText={t('editProfilePicture')}
+            modalTitle={t('profilePicture')}
+            sizeConfig={{
+              maxHeight: '80px',
+            }}
+          />
+
+          <p className="fs-2 my-0 fw-medium">
+            {firstName}&nbsp;{lastName}
+          </p>
         </div>
-        <Card.Body className={styles.cardBody}>
-          <div className={`d-flex mb-2 ${styles.profileContainer}`}>
-            <div className={styles.imgContianer}>
-              {image && image !== 'null' ? (
-                <img src={image} alt={`profile picture`} />
-              ) : (
-                <Avatar
-                  name={`${firstName} ${lastName}`}
-                  alt={`dummy picture`}
-                />
-              )}
-            </div>
-            <div className={styles.profileDetails}>
-              <span
-                style={{ fontWeight: '700', fontSize: '28px' }}
-                data-tooltip-id="name"
-                data-tooltip-content={`${firstName} ${lastName}`}
-              >
-                {firstName.length > 10
-                  ? firstName.slice(0, 5) + '..'
-                  : firstName}
-              </span>
-              <ReactTooltip id="name" />
-              <span
-                data-testid="userEmail"
-                data-tooltip-id="email"
-                data-tooltip-content={email}
-              >
-                {email.length > 10
-                  ? email.slice(0, 4) + '..' + email.slice(email.indexOf('@'))
-                  : email}
-              </span>
-              <ReactTooltip id="email" />
-              <span className="d-flex">
-                <CalendarMonthOutlinedIcon />
-                <span className="d-flex align-end">
-                  {tCommon('joined')} {joinedDate(createdAt)}
-                </span>
-              </span>
-            </div>
-          </div>
-          <div className="mt-4 mb-1 d-flex justify-content-center">
-            <Button data-testid="copyProfileLink">{t('copyLink')}</Button>
-          </div>
-        </Card.Body>
-      </Card>
-    </>
+
+        <div className="d-flex flex-column mx-2">
+          <span data-testid="userEmail">
+            <MailOutlineIcon fontSize="small" />
+            &nbsp;
+            {email}
+          </span>
+          <span>
+            <CalendarIcon fontSize="small" />
+            &nbsp;
+            {tCommon('joined')} {joinedDate(createdAt)}
+          </span>
+        </div>
+      </Card.Body>
+    </Card>
   );
 };
 

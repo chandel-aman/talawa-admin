@@ -11,16 +11,13 @@ import { toast } from 'react-toastify';
 import { errorHandler } from 'utils/errorHandler';
 import Loader from 'components/Loader/Loader';
 import useLocalStorage from 'utils/useLocalstorage';
-import Avatar from 'components/Avatar/Avatar';
 import {
   CalendarIcon,
   DatePicker,
   LocalizationProvider,
 } from '@mui/x-date-pickers';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Form } from 'react-bootstrap';
-import convertToBase64 from 'utils/convertToBase64';
-import sanitizeHtml from 'sanitize-html';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import {
@@ -30,6 +27,7 @@ import {
   employmentStatusEnum,
 } from 'utils/formEnumFields';
 import DynamicDropDown from 'components/DynamicDropDown/DynamicDropDown';
+import EditableImage from 'components/EditableImage/EditableImage';
 
 type MemberDetailProps = {
   id?: string; // This is the userId
@@ -82,7 +80,11 @@ const MemberDetail: React.FC<MemberDetailProps> = ({ id }): JSX.Element => {
     }
   };
   const [updateUser] = useMutation(UPDATE_USER_MUTATION);
-  const { data: user, loading: loading } = useQuery(USER_DETAILS, {
+  const {
+    data: user,
+    loading: loading,
+    refetch,
+  } = useQuery(USER_DETAILS, {
     variables: { id: currentUrl }, // For testing we are sending the id as a prop
   });
   const userData = user?.user;
@@ -155,6 +157,60 @@ const MemberDetail: React.FC<MemberDetailProps> = ({ id }): JSX.Element => {
     // console.log(formState);
   };
 
+  const handleSaveImage = async (selectedImage: File): Promise<void> => {
+    if (selectedImage) {
+      const formData = new FormData();
+      formData.append('file', selectedImage);
+      const accessToken = getItem('token');
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_TALAWA_REST_URL}/user/update-profile-picture`,
+          {
+            method: 'POST',
+            body: formData,
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          setItem('UserImage', data.user?.image);
+          toast.success('Successfully updated');
+          refetch();
+        } else {
+          toast.error('Failed to update profile picture');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error('An error occurred while updating the profile picture');
+      }
+    }
+  };
+
+  const handleDeleteImage = async (): Promise<void> => {
+    try {
+      const accessToken = getItem('token');
+      const response = await fetch(
+        `${process.env.REACT_APP_TALAWA_REST_URL}/user/update-profile-picture`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      );
+
+      if (response.ok) {
+        toast.success(t('profilePictureDeletedMsg'));
+        await refetch();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete profile picture');
+      }
+    } catch (error: unknown) {
+      errorHandler(t, error as Error);
+    }
+  };
+
   const loginLink = async (): Promise<void> => {
     try {
       // console.log(formState);
@@ -162,7 +218,6 @@ const MemberDetail: React.FC<MemberDetailProps> = ({ id }): JSX.Element => {
       const lastName = formState.lastName;
       const email = formState.email;
       // const appLanguageCode = formState.appLanguageCode;
-      const image = formState.image;
       // const gender = formState.gender;
       let toSubmit = true;
       if (firstName.trim().length == 0 || !firstName) {
@@ -192,7 +247,6 @@ const MemberDetail: React.FC<MemberDetailProps> = ({ id }): JSX.Element => {
             setItem('FirstName', firstName);
             setItem('LastName', lastName);
             setItem('Email', email);
-            setItem('UserImage', image);
           }
           toast.success(tCommon('successfullyUpdated') as string);
         }
@@ -212,13 +266,6 @@ const MemberDetail: React.FC<MemberDetailProps> = ({ id }): JSX.Element => {
   if (loading) {
     return <Loader />;
   }
-
-  const sanitizedSrc = sanitizeHtml(formState.image, {
-    allowedTags: ['img'],
-    allowedAttributes: {
-      img: ['src', 'alt'],
-    },
-  });
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -314,29 +361,6 @@ const MemberDetail: React.FC<MemberDetailProps> = ({ id }): JSX.Element => {
                     fieldName="maritalStatus" // Label for the field
                   />
                 </div>
-                <p className="my-0 mx-2 w-100">
-                  <label htmlFor="orgphoto" className={styles.orgphoto}>
-                    {tCommon('displayImage')}:
-                    <Form.Control
-                      className="w-75"
-                      accept="image/*"
-                      id="orgphoto"
-                      name="photo"
-                      type="file"
-                      multiple={false}
-                      onChange={async (e: React.ChangeEvent): Promise<void> => {
-                        const target = e.target as HTMLInputElement;
-                        const image = target.files && target.files[0];
-                        if (image)
-                          setFormState({
-                            ...formState,
-                            image: await convertToBase64(image),
-                          });
-                      }}
-                      data-testid="organisationImage"
-                    />
-                  </label>
-                </p>
               </div>
             </div>
             {/* Contact Info */}
@@ -427,33 +451,31 @@ const MemberDetail: React.FC<MemberDetailProps> = ({ id }): JSX.Element => {
               >
                 <h3>{t('personalDetailsHeading')}</h3>
               </div>
-              <div className="d-flex flex-row p-4">
-                <div className="d-flex flex-column">
-                  {formState.image ? (
-                    <img
-                      className={`rounded-circle mx-auto`}
-                      style={{ width: '80px', aspectRatio: '1/1' }}
-                      src={sanitizedSrc}
-                      data-testid="userImagePresent"
-                    />
-                  ) : (
-                    <>
-                      <Avatar
-                        name={`${userData?.user?.firstName} ${userData?.user?.lastName}`}
-                        alt="User Image"
-                        size={100}
-                        dataTestId="userImageAbsent"
-                        radius={50}
-                      />
-                    </>
-                  )}
-                </div>
-                <div className="d-flex flex-column mx-2">
-                  <p className="fs-2 my-0 fw-medium">{formState?.firstName}</p>
+              <div
+                className={`d-flex align-items-center p-3 pb-0 ${styles.imageAndActionContainer}`}
+              >
+                <EditableImage
+                  src={formState.image}
+                  alt={`${userData?.user?.firstName} ${userData?.user?.lastName}`}
+                  name={`${userData?.user?.firstName} ${userData?.user?.lastName}`}
+                  size="md"
+                  shape="circle"
+                  onSave={handleSaveImage}
+                  onDelete={handleDeleteImage}
+                  tooltipText={t('editProfilePicture')}
+                  modalTitle={t('profilePicture')}
+                  sizeConfig={{
+                    maxHeight: '80px',
+                  }}
+                />
+                <div className="d-flex flex-column mx-2 p-3">
+                  <p className="fs-2 my-0 fw-medium">
+                    {formState?.firstName}&nbsp;{formState?.lastName}
+                  </p>
                   <div
-                    className={`p-1 bg-white border border-success text-success text-center rounded mt-1 ${styles.WidthFit}`}
+                    className={`p-1 bg-white border border-success text-success text-center rounded mb-1 ${styles.WidthFit}`}
                   >
-                    <p className="p-0 m-0 fs-6">
+                    <p className="p-0 m-0 fs-7">
                       {userData?.appUserProfile?.isSuperAdmin
                         ? 'Super Admin'
                         : userData?.appUserProfile?.adminFor.length > 0
@@ -461,12 +483,18 @@ const MemberDetail: React.FC<MemberDetailProps> = ({ id }): JSX.Element => {
                           : 'User'}
                     </p>
                   </div>
-                  <p className="my-0">{formState.email}</p>
-                  <p className="my-0">
-                    <CalendarIcon />
-                    Joined on {prettyDate(userData?.user?.createdAt)}
-                  </p>
                 </div>
+              </div>
+              <div className="d-flex flex-column mx-2 p-3">
+                <p className="my-0">
+                  <MailOutlineIcon fontSize="small" />
+                  &nbsp;
+                  {formState.email}
+                </p>
+                <p className="my-0">
+                  <CalendarIcon fontSize="small" />
+                  &nbsp;Joined on {prettyDate(userData?.user?.createdAt)}
+                </p>
               </div>
             </div>
 

@@ -1,0 +1,83 @@
+.imageContainer {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.editOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.editIcon {
+  color: white;
+  font-size: 24px;
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modalImageContainer {
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.modalImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Shape styles */
+.circle {
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+
+.square {
+  border-radius: 0;
+  aspect-ratio: 1;
+}
+
+.rounded {
+  border-radius: 8px;
+}
+
+@media screen and (max-width: 992px) {
+  .modalImageContainer {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .modalImageContainer {
+    width: 120px;
+    height: 120px;
+  }
+}

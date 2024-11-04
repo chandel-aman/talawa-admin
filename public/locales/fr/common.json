@@ -93,5 +93,7 @@
   "late": "En retard",
   "createdLatest": "Créé le plus récemment",
   "createdEarliest": "Créé le plus tôt",
-  "searchBy": "Rechercher par {{item}}"
+  "searchBy": "Rechercher par {{item}}",
+  "update": "Mettre à jour",
+  "continue": "Continuer"
 }

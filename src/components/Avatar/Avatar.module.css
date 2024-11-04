@@ -1,14 +1,82 @@
 .imageContainer {
-  width: fit-content;
-  height: fit-content;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 100%;
+  display: inline-block;
+  overflow: hidden;
 }
+
 .imageContainer img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 100%;
+}
+
+/* Default size */
+.avatar {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+}
+
+/* Small size */
+.avatarSmall {
+  width: 64px;
+  height: 64px;
+}
+
+/* Extra small size */
+.avatarSmall {
+  width: 44px;
+  height: 44px;
+}
+
+/* Medium size */
+.avatarMedium {
+  width: 96px;
+  height: 96px;
+}
+
+/* Large size */
+.avatarLarge {
+  width: 160px;
+  height: 160px;
+}
+
+/* Extra large size for modal */
+.avatarXLarge {
+  width: 200px;
+  height: 200px;
+}
+
+/* Responsive sizes */
+@media screen and (max-width: 992px) {
+  .avatarXLarge {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .avatarXLarge {
+    width: 120px;
+    height: 120px;
+  }
+
+  .avatarLarge {
+    width: 128px;
+    height: 128px;
+  }
+
+  .avatarMedium {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* Square avatar (no border-radius) */
+.avatarSquare {
+  border-radius: 0;
+}
+
+/* Rounded avatar (slight border-radius) */
+.avatarRounded {
+  border-radius: 8px;
 }

@@ -88,11 +88,11 @@ export default superAdminScreen;
  */
 const map: Record<
   string,
-  'orgList' | 'requests' | 'users' | 'memberDetail' | 'communityProfile'
+  'orgList' | 'requests' | 'users' | 'memberDetail' | 'communitySettings'
 > = {
   orglist: 'orgList',
   requests: 'requests',
   users: 'users',
   member: 'memberDetail',
-  communityProfile: 'communityProfile',
+  communitySettings: 'communitySettings',
 };

@@ -104,7 +104,7 @@ const leftDrawer = ({
                   </Button>
                 )}
               </NavLink>
-              <NavLink to={'/communityProfile'} onClick={handleLinkClick}>
+              <NavLink to={'/communitySettings'} onClick={handleLinkClick}>
                 {({ isActive }) => (
                   <Button
                     variant={isActive === true ? 'success' : ''}
@@ -122,7 +122,7 @@ const leftDrawer = ({
                         }`}
                       />
                     </div>
-                    {t('communityProfile')}
+                    {t('communitySettings')}
                   </Button>
                 )}
               </NavLink>

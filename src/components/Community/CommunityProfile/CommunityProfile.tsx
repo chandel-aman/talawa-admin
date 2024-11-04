@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 
 import Loader from 'components/Loader/Loader';
 import { GET_COMMUNITY_DATA } from 'GraphQl/Queries/Queries';
-import { UPDATE_COMMUNITY, RESET_COMMUNITY } from 'GraphQl/Mutations/mutations';
+import { RESET_COMMUNITY } from 'GraphQl/Mutations/mutations';
 import {
   FacebookLogo,
   InstagramLogo,
@@ -20,7 +20,9 @@ import {
 import convertToBase64 from 'utils/convertToBase64';
 import styles from './CommunityProfile.module.css';
 import { errorHandler } from 'utils/errorHandler';
-import UpdateSession from '../../components/UpdateSession/UpdateSession';
+import useLocalStorage from 'utils/useLocalstorage';
+import UpdateSession from '../../UpdateSession/UpdateSession';
+import EditableImage from 'components/EditableImage/EditableImage';
 
 /**
  * `CommunityProfile` component allows users to view and update their community profile details.
@@ -43,10 +45,8 @@ const CommunityProfile = (): JSX.Element => {
     keyPrefix: 'communityProfile',
   });
   const { t: tCommon } = useTranslation('common');
+  const { getItem } = useLocalStorage();
 
-  document.title = t('title'); // Set document title
-
-  // Define the type for pre-login imagery data
   type PreLoginImageryDataType = {
     _id: string;
     name: string | undefined;
@@ -79,18 +79,16 @@ const CommunityProfile = (): JSX.Element => {
     slack: '',
   });
 
-  // Query to fetch community data
-  const { data, loading } = useQuery(GET_COMMUNITY_DATA);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  // Mutations for updating and resetting community data
-  const [uploadPreLoginImagery] = useMutation(UPDATE_COMMUNITY);
+  const [selectedImage, setSelectedImage] = React.useState<File | null>(null);
+  const { data, loading, refetch } = useQuery(GET_COMMUNITY_DATA);
   const [resetPreLoginImagery] = useMutation(RESET_COMMUNITY);
 
-  // Effect to set profile data from fetched data
   React.useEffect(() => {
     const preLoginData: PreLoginImageryDataType | undefined =
       data?.getCommunityData;
-    preLoginData &&
+    if (preLoginData)
       setProfileVariable({
         name: preLoginData.name ?? '',
         websiteLink: preLoginData.websiteLink ?? '',
@@ -119,6 +117,22 @@ const CommunityProfile = (): JSX.Element => {
   };
 
   /**
+   * Handles change events for image inputs.
+   *
+   * @param file - Change event for file input
+   */
+  const handleImageChange = async (file: File): Promise<void> => {
+    if (file) {
+      const base64file = await convertToBase64(file);
+      setSelectedImage(file);
+      setProfileVariable((prev) => ({
+        ...prev,
+        logoUrl: base64file ?? '',
+      }));
+    }
+  };
+
+  /**
    * Handles form submission to update community profile.
    *
    * @param e - Form submit event
@@ -128,28 +142,48 @@ const CommunityProfile = (): JSX.Element => {
   ): Promise<void> => {
     e.preventDefault();
     try {
-      await uploadPreLoginImagery({
-        variables: {
-          data: {
-            name: profileVariable.name,
-            websiteLink: profileVariable.websiteLink,
-            logo: profileVariable.logoUrl,
-            socialMediaUrls: {
-              facebook: profileVariable.facebook,
-              instagram: profileVariable.instagram,
-              X: profileVariable.X,
-              linkedIn: profileVariable.linkedIn,
-              gitHub: profileVariable.github,
-              youTube: profileVariable.youtube,
-              reddit: profileVariable.reddit,
-              slack: profileVariable.slack,
-            },
-          },
+      const formData = new FormData();
+      formData.append('name', profileVariable.name);
+      formData.append('websiteLink', profileVariable.websiteLink);
+      formData.append('logoUrl', profileVariable.logoUrl);
+      if (selectedImage) formData.append('file', selectedImage);
+
+      // Append social media URLs as a JSON string
+      const socialMediaUrls = {
+        facebook: profileVariable.facebook,
+        instagram: profileVariable.instagram,
+        twitter: profileVariable.X,
+        linkedIn: profileVariable.linkedIn,
+        gitHub: profileVariable.github,
+        youTube: profileVariable.youtube,
+        reddit: profileVariable.reddit,
+        slack: profileVariable.slack,
+      };
+      formData.append('socialMediaUrls', JSON.stringify(socialMediaUrls));
+
+      const accessToken = getItem('token');
+      const response = await fetch(
+        `${process.env.REACT_APP_TALAWA_REST_URL}/community/update`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: { Authorization: `Bearer ${accessToken}` },
         },
-      });
-      toast.success(t('profileChangedMsg') as string);
+      );
+
+      if (response.ok) {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        toast.success(t('profileChangedMsg'));
+        refetch();
+      } else {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || 'Failed to update community profile',
+        );
+      }
     } catch (error: unknown) {
-      /* istanbul ignore next */
       errorHandler(t, error as Error);
     }
   };
@@ -180,7 +214,7 @@ const CommunityProfile = (): JSX.Element => {
           resetPreLoginImageryId: preLoginData?._id,
         },
       });
-      toast.success(t(`resetData`) as string);
+      toast.success(t(`resetData`));
     } catch (error: unknown) {
       /* istanbul ignore next */
       errorHandler(t, error as Error);
@@ -207,16 +241,35 @@ const CommunityProfile = (): JSX.Element => {
   if (loading) {
     <Loader />;
   }
-
   return (
     <>
-      <Card border="0" className={`${styles.card} "rounded-4 my-4 shadow-sm"`}>
+      <Card
+        className={`${styles.card} rounded-4 mb-4 shadow-sm border border-light-subtle`}
+      >
         <div className={styles.cardHeader}>
           <div className={styles.cardTitle}>{t('editProfile')}</div>
         </div>
         <Card.Body>
           <div className="mb-3">{t('communityProfileInfo')}</div>
+
           <Form onSubmit={handleOnSubmit}>
+            <div className="d-flex align-items-start justify-content-between">
+              <Form.Label>{t('logo')}</Form.Label>
+              <EditableImage
+                src={profileVariable.logoUrl}
+                alt="Community Logo"
+                size="md"
+                shape="rounded"
+                onSave={handleImageChange}
+                tooltipText={t('editCommunityLogo')}
+                modalTitle={t('logo')}
+                sizeConfig={{
+                  maxHeight: '80px',
+                  width: 'min-content',
+                }}
+                showContinue
+              />
+            </div>
             <Form.Group>
               <Form.Label className={styles.formLabel}>
                 {t('communityName')}
@@ -249,40 +302,11 @@ const CommunityProfile = (): JSX.Element => {
                 required
               />
             </Form.Group>
-            <Form.Group>
-              <Form.Label className={styles.formLabel}>{t('logo')}</Form.Label>
-              <Form.Control
-                accept="image/*"
-                multiple={false}
-                type="file"
-                id="logo"
-                name="logo"
-                data-testid="fileInput"
-                onChange={async (
-                  e: React.ChangeEvent<HTMLInputElement>,
-                ): Promise<void> => {
-                  setProfileVariable((prevInput) => ({
-                    ...prevInput,
-                    logo: '',
-                  }));
-                  const target = e.target as HTMLInputElement;
-                  const file = target.files?.[0];
-                  const base64file = file && (await convertToBase64(file));
-                  setProfileVariable({
-                    ...profileVariable,
-                    logoUrl: base64file ?? '',
-                  });
-                }}
-                className="mb-3"
-                autoComplete="off"
-                required
-              />
-            </Form.Group>
+
             <Form.Group>
               <Form.Label className={styles.formLabel}>
                 {t('social')}
               </Form.Label>
-              {/* Social media inputs */}
               <div className="mb-3 d-flex align-items-center gap-3">
                 <img src={FacebookLogo} alt="Facebook Logo" />
                 <Form.Control
@@ -418,7 +442,6 @@ const CommunityProfile = (): JSX.Element => {
           </Form>
         </Card.Body>
       </Card>
-
       <UpdateSession />
     </>
   );

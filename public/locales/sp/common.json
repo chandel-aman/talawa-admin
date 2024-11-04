@@ -93,5 +93,7 @@
   "late": "Tarde",
   "createdLatest": "Creado más reciente",
   "createdEarliest": "Creado más temprano",
-  "searchBy": "Buscar por {{item}}"
+  "searchBy": "Buscar por {{item}}",
+  "update": "Actualizar",
+  "continue": "Continuar"
 }

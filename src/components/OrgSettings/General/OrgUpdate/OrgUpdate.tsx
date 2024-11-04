@@ -9,8 +9,7 @@ import { WarningAmberRounded } from '@mui/icons-material';
 import { UPDATE_ORGANIZATION_MUTATION } from 'GraphQl/Mutations/mutations';
 import { ORGANIZATIONS_LIST } from 'GraphQl/Queries/Queries';
 import Loader from 'components/Loader/Loader';
-import { Col, Form, Row } from 'react-bootstrap';
-import convertToBase64 from 'utils/convertToBase64';
+import { Col, Form, Modal, Row } from 'react-bootstrap';
 import { errorHandler } from 'utils/errorHandler';
 import styles from './OrgUpdate.module.css';
 import type {
@@ -18,6 +17,7 @@ import type {
   InterfaceAddress,
 } from 'utils/interfaces';
 import { countryOptions } from 'utils/formEnumFields';
+import useLocalStorage from 'utils/useLocalstorage';
 
 interface InterfaceOrgUpdateProps {
   orgId: string;
@@ -35,6 +35,7 @@ interface InterfaceOrgUpdateProps {
  */
 function orgUpdate(props: InterfaceOrgUpdateProps): JSX.Element {
   const { orgId } = props;
+  const { getItem } = useLocalStorage();
 
   const [formState, setFormState] = useState<{
     orgName: string;
@@ -56,6 +57,10 @@ function orgUpdate(props: InterfaceOrgUpdateProps): JSX.Element {
     },
     orgImage: null,
   });
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
   const handleInputChange = (fieldName: string, value: string): void => {
     setFormState((prevState) => ({
@@ -138,17 +143,70 @@ function orgUpdate(props: InterfaceOrgUpdateProps): JSX.Element {
           },
           userRegistrationRequired: userRegistrationRequiredChecked,
           visibleInSearch: visiblechecked,
-          file: formState.orgImage,
         },
       });
       // istanbul ignore next
       if (data) {
         refetch({ id: orgId });
-        toast.success(t('successfulUpdated') as string);
+        toast.success(t('successfulUpdated'));
       }
     } catch (error: unknown) {
       errorHandler(t, error);
     }
+  };
+
+  const handleImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ): Promise<void> => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+        setShowPreviewModal(true);
+      };
+      reader.readAsDataURL(file);
+      setSelectedImage(file);
+    }
+  };
+
+  const handleSaveImage = async (): Promise<void> => {
+    if (selectedImage) {
+      const formData = new FormData();
+      formData.append('file', selectedImage);
+      const accessToken = getItem('token');
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_TALAWA_REST_URL}/org/${orgId}/update-image`,
+          {
+            method: 'POST',
+            body: formData,
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data) {
+            refetch({ id: orgId });
+            toast.success(t('successfulUpdated'));
+          }
+          console.log(data);
+          setShowPreviewModal(false);
+          setSelectedImage(null);
+        } else {
+          console.error('Failed to update profile picture');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+  };
+
+  const handleCancelImage = (): void => {
+    setPreviewUrl(null);
+    setSelectedImage(null);
+    setShowPreviewModal(false);
   };
 
   if (loading) {
@@ -330,16 +388,7 @@ function orgUpdate(props: InterfaceOrgUpdateProps): JSX.Element {
             name="photo"
             type="file"
             multiple={false}
-            onChange={async (e: React.ChangeEvent): Promise<void> => {
-              const target = e.target as HTMLInputElement;
-              const file = target.files && target.files[0];
-              /* istanbul ignore else */
-              if (file)
-                setFormState({
-                  ...formState,
-                  orgImage: await convertToBase64(file),
-                });
-            }}
+            onChange={handleImageChange}
             data-testid="organisationImage"
           />
           <div className="d-flex justify-content-end">
@@ -353,6 +402,33 @@ function orgUpdate(props: InterfaceOrgUpdateProps): JSX.Element {
           </div>
         </form>
       </div>
+      {showPreviewModal && previewUrl && (
+        <Modal
+          show={showPreviewModal}
+          onHide={handleCancelImage}
+          backdrop="static"
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Image Preview</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <img
+              src={previewUrl}
+              alt="Preview"
+              style={{ width: '100%', height: 'auto' }}
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCancelImage}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSaveImage}>
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
     </>
   );
 }

@@ -93,5 +93,7 @@
   "late": "迟到",
   "createdLatest": "最近创建",
   "createdEarliest": "最早创建",
-  "searchBy": "搜索依据 {{item}}"
+  "searchBy": "搜索依据 {{item}}",
+  "update": "更新",
+  "continue": "继续"
 }

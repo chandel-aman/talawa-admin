@@ -6,11 +6,10 @@ import styles from 'components/Avatar/Avatar.module.css';
 interface InterfaceAvatarProps {
   name: string;
   alt?: string;
-  size?: number;
-  containerStyle?: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   avatarStyle?: string;
   dataTestId?: string;
-  radius?: number;
+  shape?: 'circle' | 'square' | 'rounded';
 }
 
 /**
@@ -29,30 +28,44 @@ interface InterfaceAvatarProps {
 const Avatar = ({
   name,
   alt = 'Dummy Avatar',
-  size,
+  size = 'md',
   avatarStyle,
-  containerStyle,
   dataTestId,
-  radius,
+  shape = 'circle',
 }: InterfaceAvatarProps): JSX.Element => {
+  const sizeMap = {
+    xs: 44,
+    sm: 64,
+    md: 96,
+    lg: 160,
+    xl: 200,
+  };
   // Memoize the avatar creation to avoid unnecessary recalculations
   const avatar = useMemo(() => {
     return createAvatar(initials, {
-      size: size || 128,
+      size: sizeMap[size],
       seed: name,
-      radius: radius || 0,
+      radius: shape === 'circle' ? 50 : shape === 'rounded' ? 8 : 0,
     }).toDataUriSync();
-  }, [name, size]);
+  }, [name, size, shape]);
 
-  const svg = avatar?.toString();
+  const svg = avatar.toString();
+
+  const getAvatarClassName = (): string => {
+    let className = `${styles.avatar} ${styles[`avatar${size.charAt(0).toUpperCase() + size.slice(1)}`]}`;
+    if (shape === 'square') className += ` ${styles.avatarSquare}`;
+    if (shape === 'rounded') className += ` ${styles.avatarRounded}`;
+    if (avatarStyle) className += ` ${avatarStyle}`;
+    return className;
+  };
 
   return (
-    <div className={`${containerStyle ?? styles.imageContainer}`}>
+    <div className={styles.imageContainer}>
       <img
         src={svg}
         alt={alt}
-        className={avatarStyle ? avatarStyle : ''}
-        data-testid={dataTestId ? dataTestId : ''}
+        className={getAvatarClassName()}
+        data-testid={dataTestId || ''}
       />
     </div>
   );

@@ -97,7 +97,8 @@
     "talawaAdminPortal": "talawaAdminPortal",
     "menu": "menu",
     "users": "users",
-    "logout": "logout"
+    "logout": "logout",
+    "communitySettings": "Community Settings"
   },
   "leftDrawerOrg": {
     "Dashboard": "Dashboard",
@@ -235,6 +236,11 @@
     "AlreadyJoined": "AlreadyJoined",
     "errorOccured": "errorOccured"
   },
+  "communitySettings": {
+    "title": "Community Settings",
+    "profile": "Profile",
+    "security": "Security"
+  },
   "communityProfile": {
     "title": "Community Profile",
     "editProfile": "Edit Profile",
@@ -245,7 +251,38 @@
     "social": "Social Media Links",
     "url": "Enter url",
     "profileChangedMsg": "Successfully updated the Profile Details.",
-    "resetData": "Successfully reset the Profile Details."
+    "resetData": "Successfully reset the Profile Details.",
+    "editCommunityLogo": "Edit Logo"
+  },
+  "communitySecuritySettings": {
+    "mandatoryFieldsError": "Please fill in all mandatory fields.",
+    "instantBackupSuccess": "Instant backup was successful.",
+    "scheduledBackupInProgress": "Scheduled backup is being configured.",
+    "selectBackupError": "Please select a backup to restore.",
+    "restoreInProgress": "Restoration is in progress...",
+    "restoreSuccess": "Restoration completed successfully.",
+    "backupAndRestore": "Backup and Restore",
+    "backupType": "Backup Type",
+    "backupFrequency": "Backup Frequency",
+    "backupTime": "Backup Time",
+    "instantBackup": "Instant Backup",
+    "scheduleBackup": "Schedule Backup",
+    "availableBackups": "Available Backups",
+    "noBackupsAvailable": "No backups available.",
+    "date": "Date",
+    "type": "Type",
+    "action": "Action",
+    "encryption": "Encryption",
+    "enableEncryption": "Enable file Encryption",
+    "bothMongodbAndMinio": "Both MongoDB and MinIO",
+    "onlyMongodb": "Only MongoDB",
+    "onlyMinio": "Only MinIO",
+    "daily": "Daily",
+    "alternate": "Alternate",
+    "weekly": "Weekly",
+    "restore": "Restore",
+    "encryptionEnabled": "Encryption is enabled.",
+    "encryptionDisabled": "Encryption is disabled."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -787,6 +824,7 @@
     "title": "Settings",
     "general": "General",
     "actionItemCategories": "Action Item Categories",
+    "security": "Security",
     "updateOrganization": "Update Organization",
     "seeRequest": "See Request",
     "noData": "No data",
@@ -929,7 +967,9 @@
     "delete": "delete",
     "saveChanges": "saveChanges",
     "joined": "joined",
-    "talawaApiUnavailable": "talawaApiUnavailable"
+    "talawaApiUnavailable": "talawaApiUnavailable",
+    "editProfilePicture": "Edit Profile Picture",
+    "profilePicture": "Profile Picture"
   },
   "people": {
     "title": "People",
@@ -1099,7 +1139,10 @@
     "displayImage": "displayImage",
     "address": "address",
     "saveChanges": "saveChanges",
-    "joined": "joined"
+    "joined": "joined",
+    "update": "Update",
+    "profilePicture": "Profile Picture",
+    "editProfilePicture": "Edit Profile Picture"
   },
   "donate": {
     "title": "Donations",

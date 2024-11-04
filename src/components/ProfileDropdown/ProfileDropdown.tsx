@@ -72,7 +72,8 @@ const profileDropdown = (): JSX.Element => {
           ) : (
             <Avatar
               data-testid="display-img"
-              size={45}
+              size="xs"
+              shape="circle"
               avatarStyle={styles.avatarStyle}
               name={`${firstName} ${lastName}`}
               alt={`dummy picture`}
